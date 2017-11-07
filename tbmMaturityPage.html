@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+  
+function drawChart(dataTable) {//To create chart, uses JSON data passed from spreadsheet thru cache to this page, via withSuccessHandler()
+
+   var fixedDataTable = JSON.parse(dataTable); //convert data back to array
+   var data = google.visualization.arrayToDataTable(fixedDataTable); //assign chart data to object    
+     
+         var options = {
+          title: 'TBM Maturity Assessment: Average Results',
+          vAxis: {title: 'TBM Maturity Scale', viewWindow: {max: 5, min: 0}},
+          };
+
+        var chart = new google.charts.Bar(document.getElementById('chart_div')); //make visible as part of HTML div below
+
+        
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+        
+
+        
+      } //end drawChart() function
+      
+   google.script.run.withSuccessHandler(drawChart)
+      .grabTableData(); //runs script and returns table data from main code page
+      
+      
+    </script>
+ </head>
+  <body>
+     <div id="chart_div" style="width: 800px; height: 400px;">No result yet...</div>
+  </body>
+</html>
+
+

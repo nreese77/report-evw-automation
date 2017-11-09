@@ -168,7 +168,7 @@ function createAveragesChart() {
  
   dataTable[0] = ['',todayHeader,in12MonthsHeader]; //make header row
   
-  for (i in hAxisLabels) { //load up table with data
+  for (i in hAxisLabels) { //load up array with data
     var rowValues = [ String(hAxisLabels[i]), Number(todayValues[i]), Number(in12MonthsValues[i]) ];
     dataTable.push(rowValues);
   }
@@ -229,7 +229,106 @@ function grabTableData() {
 } // grabTableData() function end
 
 
+/******************************************************************************
+this function is used to create a chart to show ranking distributions
+*******************************************************************************
+*/
 
+function createRankChart () {
+  //collect data
+  var activeSpreadsheet = SpreadsheetApp.getActive();
+  var resultsSheetName = 'theResults';
+  var theResultsSheet = activeSpreadsheet.getSheetByName(resultsSheetName);
+  var inputMarker = activeSpreadsheet.getRangeByName('templateInputs'); /*a range has been named on 
+  the template to make it easier to measure size*/
+  
+  //get data for rank
+  var totalColumn = theResultsSheet.getLastColumn() - 1;
+  var rows = inputMarker.getNumRows();
+  var row = (2 * 3) + (rows * 2);
+  
+//  //test
+//  var testRange = theResultsSheet.getRange(row, totalColumn);
+//  theResultsSheet.setActiveRange(testRange).activate();
+  
+  //get data for ranking
+  var rankHeader = theResultsSheet.getRange(row, totalColumn, 1).getValue();
+  row++;
+  var numColumns = totalColumn;
+  var rankRange = theResultsSheet.getRange(1, 2, 1, numColumns).getValues(); //grab headers
+  var rankValues = rankRange; // load headers into array
+  
+  
+  for (i = 0; i < rows; i++) {//load up array with data
+    var rankRange = theResultsSheet.getRange(row + i, 2, 1, numColumns).getValues();
+    rankValues.push(rankRange[0]);
+   
+  }
+ 
+  //restructure array into new array that fits format for scatter chart
+  var endLength = rankValues[0].length - 1;
+  var dataEnd = rankValues[0].length - 2;
+  var datasetForRankArray = new Array();//temporary array for data assembly
+  var rankArrayForChart = new Array();//final array for transfer
+  
+  for (i = 0; i < rows; i++) {//creates new array
+   //header row
+    datasetForRankArray.push([
+      String(rankValues[i + 1][endLength]),
+      'Priority Rank',
+      'LabelA',
+      'Average',
+      'LabelB']);
+  
+    //data from individual respondents 
+    for (z = 0; z < dataEnd ; z++) {//load header, details, then average
+    
+        var rowValues = [
+          Number(rankValues[i + 1][z]),
+          0,
+          String(rankValues[0][z]),
+          null,
+          null,
+          ];
+        datasetForRankArray.push(rowValues);   
+     }
+     //last row with average
+          datasetForRankArray.push([
+          Number(rankValues[i + 1][dataEnd]),
+            null,
+            null,
+            0,
+            'Average']);
+      //load the final array up 
+      rankArrayForChart.push(datasetForRankArray);
+      //clean out temp array for next run through loop
+      datasetForRankArray = new Array();
+    }
+    
+    //load data into cache and run html to create chart
+    var cache = CacheService.getDocumentCache();
+    var dataTableString = JSON.stringify(rankArrayForChart); //convert to JSON to maintain format thru transfer
+    
+    cache.put('rankData', dataTableString);
+    Logger.log('original' + dataTableString);
+    
+    //this section points to html page and sets the page's size
+    var html = HtmlService.createHtmlOutputFromFile('tbmRankPage')
+    .setWidth(1000)
+    .setHeight(450);
+    SpreadsheetApp.getUi()
+    .showModalDialog(html, 'Results');
+    
+    
+    
+
+
+
+    
+  //test
+    Browser.msgBox('All Done :-)')
+  
+} //end of createRankChart()
 
 
 

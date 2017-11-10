@@ -6,9 +6,79 @@
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawChart);
+      
+      function drawChart(dataTable) {
+       var data = new google.visualization.DataTable();
+       data.addColumn('string', 'TBM Area'); // Implicit domain column.
+       data.addColumn('number', 'Avg Rank'); // Implicit data column.
+       data.addColumn({type:'number', role:'interval'}); //interval columns
+       data.addColumn({type:'number', role:'interval'});
+       
+       var fixedDataTable = JSON.parse(dataTable); // convert cache table back to array
+       data.addRows(fixedDataTable);
+       
+//       data.addRows([ //test data
+//       ['ITPlanning & Forecasting',2,1,4],
+//       ['Optimization', 2,1,3],
+//       ['Business Alignment',3,2,4],
+//       ]);
+
+     
+       
+       var options = {
+       legend: {position: 'none'},
+//       title: 'Average TBM Rankings (with spread)',
+       dataOpacity: 0.3,
+       hAxis: {title: 'Ranking', titleTextStyle: {
+                                  bold: true,
+                                  italic: false},
+              textStyle: {bold: true}}
+       };
+       
+       var chart = new google.visualization.BarChart(
+                document.getElementById('chart_div'));
+       
+       chart.draw(data, options);
+      
+      
+      
+      }//end drawChart() function
+      
+      
+
+
+//      //scatter chart build
+//      function drawChart(dataTable) {//To create chart, uses JSON data passed from spreadsheet thru cache to this page, via withSuccessHandler()
+//       
+//      
+//      var fixedDataTable = JSON.parse(dataTable); // convert data back to array
+//      var fixedDataTable2 = fixedDataTable[0];
+//      var data = google.visualization.arrayToDataTable(fixedDataTable2); //assign chart data to object
+//      
+//      var options = {
+//      title: 'TBM Ranking',
+//      };
+//      
+//      
+//      
+//        var chart = new google.charts.Scatter(document.getElementById('chart_div'));
+//
+//        chart.draw(data, google.charts.Scatter.convertOptions(options));
+//      
+//      } //end drawChart() function
+      
+      
+      
+      
+      google.script.run.withSuccessHandler(drawChart)
+      .grabTableData2(); //runs script and returns table data from main code page
+      
+      
+      
+      </script>
   </head>
   <body>
-    
+  <div id="chart_div" style="width: 650px; height: 450px;"></div>  
   </body>
 </html>
 

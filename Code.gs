@@ -13,6 +13,7 @@ function onOpen() {
  .createMenu('TBM Assessment')
  .addItem('Create new TBM maturity worksheet', 'createMaturitySheet')
   .addItem('Show average TBM maturity results', 'createAveragesChart')
+  .addItem('Show average rankings','createRankChart')
   .addToUi();
 } //onOpen() function end
 
@@ -265,73 +266,114 @@ function createRankChart () {
    
   }
  
-  //restructure array into new array that fits format for scatter chart
+  //restructure array into new array that fits format for chart
   var endLength = rankValues[0].length - 1;
   var dataEnd = rankValues[0].length - 2;
   var datasetForRankArray = new Array();//temporary array for data assembly
   var rankArrayForChart = new Array();//final array for transfer
   
-  for (i = 0; i < rows; i++) {//creates new array
-   //header row
-    datasetForRankArray.push([
-      String(rankValues[i + 1][endLength]),
-      'Priority Rank',
-      'LabelA',
-      'Average',
-      'LabelB']);
   
-    //data from individual respondents 
-    for (z = 0; z < dataEnd ; z++) {//load header, details, then average
+  // bar chart method
+
+  for (i = 1; i < rows + 1; i++) {//creates new array
     
-        var rowValues = [
-          Number(rankValues[i + 1][z]),
-          0,
-          String(rankValues[0][z]),
-          null,
-          null,
-          ];
-        datasetForRankArray.push(rowValues);   
-     }
-     //last row with average
-          datasetForRankArray.push([
-          Number(rankValues[i + 1][dataEnd]),
-            null,
-            null,
-            0,
-            'Average']);
-      //load the final array up 
-      rankArrayForChart.push(datasetForRankArray);
-      //clean out temp array for next run through loop
-      datasetForRankArray = new Array();
-    }
+    var arrayRow = rankValues[i];
+    var rowName = arrayRow.pop();
+    var rowAvg = arrayRow.pop();
+    var rowMin = arrayRow.sort().shift();
+    var rowMax = arrayRow.pop();
+    
+    
+    var rowValues = [
+      rowName,
+      rowAvg,
+      rowMin,
+      rowMax,
+      ];
+     
+      rankArrayForChart.push(rowValues); 
+    
+  }
+  
+//  //scatter chart method
+//  
+//  for (i = 0; i < rows; i++) {//creates new array
+//   //header row
+//    datasetForRankArray.push([
+//      String(rankValues[i + 1][endLength]),
+//      'Priority Rank',
+////      'LabelA',
+//      'Average',
+////      'LabelB'
+//    ]);
+//  
+//    //data from individual respondents 
+//    for (z = 0; z < dataEnd ; z++) {//load header, details, then average
+//    
+//        var rowValues = [
+//          Number(rankValues[i + 1][z]),
+//          0,
+////          String(rankValues[0][z]),
+//          null,
+////          null,
+//          ];
+//        datasetForRankArray.push(rowValues);   
+//     }
+//     //last row with average
+//          datasetForRankArray.push([
+//          Number(rankValues[i + 1][dataEnd]),
+//            null,
+////            null,
+//            1,
+////            'Average',
+//              ]);
+//      //load the final array up 
+//      rankArrayForChart.push(datasetForRankArray);
+//      //clean out temp array for next run through loop
+//      datasetForRankArray = new Array();
+//    }
     
     //load data into cache and run html to create chart
     var cache = CacheService.getDocumentCache();
     var dataTableString = JSON.stringify(rankArrayForChart); //convert to JSON to maintain format thru transfer
     
     cache.put('rankData', dataTableString);
-    Logger.log('original' + dataTableString);
+    Logger.log('original' + rankArrayForChart + '/n' + 'postJSON' + dataTableString);
     
     //this section points to html page and sets the page's size
     var html = HtmlService.createHtmlOutputFromFile('tbmRankPage')
-    .setWidth(1000)
-    .setHeight(450);
+    .setWidth(660)
+    .setHeight(470);
     SpreadsheetApp.getUi()
-    .showModalDialog(html, 'Results');
+    .showModalDialog(html, 'Average TBM Rankings (with spread)');
     
     
-    
-
-
+//test area    
+var cache1 = CacheService.getDocumentCache();
+    var dataForChart = (cache1.get('rankData'));
+    var testValue = JSON.parse(dataForChart);
+    var testValue2 = testValue[0]
+//test area
 
     
   //test
-    Browser.msgBox('All Done :-)')
+//    Browser.msgBox('All Done :-)')
   
 } //end of createRankChart()
 
 
-
+/***************************************************************************
+this function is used to pass data to tbmRankPage.html via withSuccessHandler()
+****************************************************************************
+*/
+  
+  function grabTableData2() {
+    var cache1 = CacheService.getDocumentCache();
+    var dataForChart = (cache1.get('rankData'));
+    var testValue = JSON.parse(dataForChart);
+    Logger.log('return:' + testValue);
+    return dataForChart;
+  }// grabTableData2() function end
 
 
 

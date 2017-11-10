@@ -13,7 +13,7 @@ function onOpen() {
  .createMenu('TBM Assessment')
  .addItem('Create new TBM maturity worksheet', 'createMaturitySheet')
   .addItem('Show average TBM maturity results', 'createAveragesChart')
-  .addItem('Show average rankings','createRankChart')
+  .addItem('Show average TBM priority rankings','createRankChart')
   .addToUi();
 } //onOpen() function end
 
@@ -185,10 +185,10 @@ function createAveragesChart() {
  
   //this section points to html page and sets the page's size
   var html = HtmlService.createHtmlOutputFromFile('tbmMaturityPage')
-  .setWidth(1000)
+  .setWidth(820)
   .setHeight(450);
   SpreadsheetApp.getUi()
-  .showModalDialog(html, 'Results');
+  .showModalDialog(html, 'TBM Maturity Assessment: Average Results');
 
 //Save this section in case we need to build a chart in the spreadsheet 
 //build chart in the spreadsheet
@@ -243,7 +243,7 @@ function createRankChart () {
   var inputMarker = activeSpreadsheet.getRangeByName('templateInputs'); /*a range has been named on 
   the template to make it easier to measure size*/
   
-  //get data for rank
+  //get location of ranking data on results sheet
   var totalColumn = theResultsSheet.getLastColumn() - 1;
   var rows = inputMarker.getNumRows();
   var row = (2 * 3) + (rows * 2);
@@ -252,7 +252,7 @@ function createRankChart () {
 //  var testRange = theResultsSheet.getRange(row, totalColumn);
 //  theResultsSheet.setActiveRange(testRange).activate();
   
-  //get data for ranking
+  //get data for ranking loaded into initial array
   var rankHeader = theResultsSheet.getRange(row, totalColumn, 1).getValue();
   row++;
   var numColumns = totalColumn;
@@ -266,14 +266,14 @@ function createRankChart () {
    
   }
  
-  //restructure array into new array that fits format for chart
+  //restructure array into new array that fits chart format
   var endLength = rankValues[0].length - 1;
   var dataEnd = rankValues[0].length - 2;
   var datasetForRankArray = new Array();//temporary array for data assembly
   var rankArrayForChart = new Array();//final array for transfer
   
   
-  // bar chart method
+  // bar chart data format method
 
   for (i = 1; i < rows + 1; i++) {//creates new array
     
@@ -295,7 +295,7 @@ function createRankChart () {
     
   }
   
-//  //scatter chart method
+//  //scatter chart data format method. Depricated for now.
 //  
 //  for (i = 0; i < rows; i++) {//creates new array
 //   //header row
@@ -337,23 +337,23 @@ function createRankChart () {
     var cache = CacheService.getDocumentCache();
     var dataTableString = JSON.stringify(rankArrayForChart); //convert to JSON to maintain format thru transfer
     
-    cache.put('rankData', dataTableString);
-    Logger.log('original' + rankArrayForChart + '/n' + 'postJSON' + dataTableString);
+    cache.put('rankData', dataTableString); //loads data into cache
+//    Logger.log('original' + rankArrayForChart + '/n' + 'postJSON' + dataTableString);
     
     //this section points to html page and sets the page's size
     var html = HtmlService.createHtmlOutputFromFile('tbmRankPage')
     .setWidth(660)
-    .setHeight(470);
+    .setHeight(420);
     SpreadsheetApp.getUi()
     .showModalDialog(html, 'Average TBM Rankings (with spread)');
     
     
-//test area    
-var cache1 = CacheService.getDocumentCache();
-    var dataForChart = (cache1.get('rankData'));
-    var testValue = JSON.parse(dataForChart);
-    var testValue2 = testValue[0]
-//test area
+////test area    
+//var cache1 = CacheService.getDocumentCache();
+//    var dataForChart = (cache1.get('rankData'));
+//    var testValue = JSON.parse(dataForChart);
+//    var testValue2 = testValue[0]
+////test area
 
     
   //test
@@ -370,8 +370,8 @@ this function is used to pass data to tbmRankPage.html via withSuccessHandler()
   function grabTableData2() {
     var cache1 = CacheService.getDocumentCache();
     var dataForChart = (cache1.get('rankData'));
-    var testValue = JSON.parse(dataForChart);
-    Logger.log('return:' + testValue);
+//    var testValue = JSON.parse(dataForChart);
+//    Logger.log('return:' + testValue);
     return dataForChart;
   }// grabTableData2() function end
 

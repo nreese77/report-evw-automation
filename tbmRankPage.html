@@ -24,21 +24,22 @@
 //       ]);
 
      
-       
+       //sets various table options
        var options = {
        legend: {position: 'none'},
-//       title: 'Average TBM Rankings (with spread)',
+//       title: '    ',
        dataOpacity: 0.3,
-       hAxis: {title: 'Ranking', titleTextStyle: {
+       hAxis: {title: 'Priority Ranking', titleTextStyle: {
                                   bold: true,
                                   italic: false},
               textStyle: {bold: true}}
        };
        
+       //set chart up for HTML visualization
        var chart = new google.visualization.BarChart(
                 document.getElementById('chart_div'));
        
-       chart.draw(data, options);
+       chart.draw(data, options); //draw chart with optoins
       
       
       
@@ -47,7 +48,7 @@
       
 
 
-//      //scatter chart build
+//      //scatter chart build. This section has been depricated
 //      function drawChart(dataTable) {//To create chart, uses JSON data passed from spreadsheet thru cache to this page, via withSuccessHandler()
 //       
 //      
@@ -78,7 +79,7 @@
       </script>
   </head>
   <body>
-  <div id="chart_div" style="width: 650px; height: 450px;"></div>  
+  <div id="chart_div" style="width: 650px; height: 400px;">No result yet...</div>  
   </body>
 </html>
 

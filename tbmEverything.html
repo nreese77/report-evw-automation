@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+    
+      google.charts.load('current', {'packages':['table']});
+      google.charts.setOnLoadCallback(drawTable);
+      
+      function drawTable(dataTable) {
+     
+    
+      var fixedDataTable = JSON.parse(dataTable); //convert cache table back to array
+      
+      //first table
+      var newDataTable1 = fixedDataTable.slice(0,1);
+      var title1a = newDataTable1[0].shift();
+      var title1b = newDataTable1[0][0].shift();
+      var remainingData1 = newDataTable1[0][0];
+      
+      var data1 = new google.visualization.DataTable();
+      data1.addColumn('string', 'Name');
+      data1.addColumn('number', title1b[1]);
+      data1.addColumn('number', title1b[2]);
+      data1.addColumn('number', title1b[3]);
+      data1.addColumn('number', title1b[4]);
+      
+      data1.addRows(remainingData1);
+      
+   
+      var table1 = new google.visualization.Table(document.getElementById('table_div1'));
+
+        table1.draw(data1, {showRowNumber: true, width: '100%', height: '100%'});
+        
+      //second table
+      var newDataTable2 = fixedDataTable.slice(1,2);
+      var title2a = newDataTable2[0].shift();
+      var title2b = newDataTable2[0][0].shift();
+      var remainingData2 = newDataTable2[0][0];
+      
+      var data2 = new google.visualization.DataTable();
+      data2.addColumn('string', 'Name');
+      data2.addColumn('number', title2b[1]);
+      data2.addColumn('number', title2b[2]);
+      data2.addColumn('number', title2b[3]);
+      data2.addColumn('number', title2b[4]);
+      
+      data2.addRows(remainingData2);
+      
+   
+      var table2 = new google.visualization.Table(document.getElementById('table_div2'));
+
+        table2.draw(data2, {showRowNumber: true, width: '100%', height: '100%'}); 
+        
+ //third table
+      var newDataTable3 = fixedDataTable.slice(2,3);
+      var title3a = newDataTable3[0].shift();
+      var title3b = newDataTable3[0][0].shift();
+      var remainingData3 = newDataTable3[0][0];
+      
+      var data3 = new google.visualization.DataTable();
+      data3.addColumn('string', 'Name');
+      data3.addColumn('number', title3b[1]);
+      data3.addColumn('number', title3b[2]);
+      data3.addColumn('number', title3b[3]);
+      data3.addColumn('number', title3b[4]);
+      
+      data3.addRows(remainingData3);
+      
+   
+      var table3 = new google.visualization.Table(document.getElementById('table_div3'));
+
+        table3.draw(data3, {showRowNumber: true, width: '100%', height: '100%'});      
+      }
+
+//      function drawTable() {
+//        var data = new google.visualization.DataTable();
+//        data.addColumn('string', 'Name');
+//        data.addColumn('number', 'Salary');
+//        data.addColumn('boolean', 'Full Time Employee');
+//        data.addRows([
+//          ['Mike',  {v: 10000, f: '$10,000'}, true],
+//          ['Jim',   {v:8000,   f: '$8,000'},  false],
+//          ['Alice', {v: 12500, f: '$12,500'}, true],
+//          ['Bob',   {v: 7000,  f: '$7,000'},  true]
+//        ]);
+//
+//        var table = new google.visualization.Table(document.getElementById('table_div'));
+//
+//        table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+//  }
+
+ google.script.run.withSuccessHandler(drawTable)
+      .grabTableData3(); //runs script and returns table data from main code page
+  
+  </script>
+  </head>
+  <body>
+   <p>Today</p>
+   <div id="table_div1"></div>
+   <p>In 12 Months</p>
+   <div id="table_div2"></div>
+   <p>Ranking</p>
+   <div id="table_div3"></div>  
+  </body>
+</html>
+
+

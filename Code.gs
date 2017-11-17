@@ -9,11 +9,14 @@ This function adds menu items to the top of the spreadsheet
 
 function onOpen() {
  //creates a menu item to run createMaturitySheet() function below
-  SpreadsheetApp.getUi()
- .createMenu('TBM Assessment')
+ var ui = SpreadsheetApp.getUi();
+ ui.createMenu('TBM Assessment')
  .addItem('Create new TBM maturity worksheet', 'createMaturitySheet')
-  .addItem('Show average TBM maturity results', 'createAveragesChart')
-  .addItem('Show average TBM priority rankings','createRankChart')
+  .addSeparator()
+  .addSubMenu(ui.createMenu('Reports')
+     .addItem('Show average TBM maturity results', 'createAveragesChart')
+     .addItem('Show average TBM priority rankings','createRankChart')
+     .addItem('Show all answers', 'showAllResults'))
   .addToUi();
 } //onOpen() function end
 
@@ -87,9 +90,10 @@ function createMaturitySheet() {
     } else {
       //create the sheet
       theResultsSheet = 
-        activeSpreadsheet.insertSheet(resultsSheetName,activeSpreadsheet.getNumSheets() - 1); 
+        activeSpreadsheet.insertSheet(resultsSheetName,activeSpreadsheet.getNumSheets() - 1);
+      theResultsSheet.hideSheet(); //hide the sheet
       //add total header
-      var resultsTotalHeader = 'Totals'  
+      var resultsTotalHeader = 'Total Average'  
       theResultsSheet.getRange(1,3,1,1)
         .setValue(resultsTotalHeader);
      
@@ -345,7 +349,7 @@ function createRankChart () {
     .setWidth(660)
     .setHeight(420);
     SpreadsheetApp.getUi()
-    .showModalDialog(html, 'Average TBM Rankings (with spread)');
+    .showModalDialog(html, 'Average TBM Rankings (and ranking distribution)');
     
     
 ////test area    
@@ -376,7 +380,204 @@ this function is used to pass data to tbmRankPage.html via withSuccessHandler()
   }// grabTableData2() function end
 
 
+/********************************************************************************
+this function creates an HTML table that shows all results of assessment
+*********************************************************************************
+*/
+ 
+function showAllResults() {
+      
+      //collect data
+      var activeSpreadsheet = SpreadsheetApp.getActive();
+      var resultsSheetName = 'theResults';
+      var theResultsSheet = activeSpreadsheet.getSheetByName(resultsSheetName);
+      var inputMarker = activeSpreadsheet.getRangeByName('templateInputs'); /*a range has been named on
+      the template to make it easier to measure size*/
+      
+      //get location of data on results sheet
+      var totalColumn = theResultsSheet.getLastColumn() - 1;
+      var rows = inputMarker.getNumRows();
+      var row = 2
+      
 
+      
+      //load all data into array
+      //get question area headers
+      var todayHeader = theResultsSheet.getRange(row, totalColumn).getValue();
+      var twelveMoHeader = theResultsSheet.getRange((row + (1 * rows) +2), totalColumn).getValue();
+      var rankHeader2 = theResultsSheet.getRange((row + (2 * rows ) + 4), totalColumn).getValue();
+      var questionAreaArray = [String(todayHeader),String(twelveMoHeader),String(rankHeader2)];
+      
+      //get column headers
+      var getColumnHeaders = theResultsSheet.getRange(row, totalColumn + 1, rows + 1, 1).getValues();
+      var columnHeaders = Array();
+    for (i = 0; i < getColumnHeaders.length; i++) {
+      columnHeaders.push(String(getColumnHeaders[i]));
+    }
+      
+      //get participant names
+      var getParticipantNames = theResultsSheet.getRange(row - 1, 2, 1, totalColumn - 1).getValues();
+      var participantNames = Array()
+    for ( i = 0; i < getParticipantNames[0].length ; i++) {
+      participantNames.push(getParticipantNames[0][i]);
+    }
+      
+         
+     //assemble final data array. Array is structured with name, then data blob
+    var dataForTotalReport = new Array();
+    var arrayAssemble1 = Array();
+    var arrayAssemble2 = Array();
+    var dataRange = Array();
+    var dataRow = Array();
+    row++;
+    
+    for (i = 0; i < 3; i++) { // works through each of the three question areas, transposing them
+      arrayAssemble1.push(questionAreaArray[i]); //add title to data block
+      dataRange = theResultsSheet.getRange(row, 2, rows, totalColumn - 1).getValues();
+      dataRow.push(columnHeaders); //put column headers on data block
+      
+      for (j = 0; j < (totalColumn - 1); j++) {//works each column in dataset
+        arrayAssemble2.push(participantNames[j]); // loads names of participants
+        for (k = 0; k < rows; k++) {//works each row in dataset
+          arrayAssemble2.push(dataRange[k][j]);
+          
+        }
+        dataRow.push(arrayAssemble2);
+        arrayAssemble2 = new Array();
+      }
+      arrayAssemble1.push(dataRow);
+      dataRow = new Array();
+      dataForTotalReport.push(arrayAssemble1);
+      arrayAssemble1 = new Array();
+      row = row + rows + 2;
+      
+    } 
+    
+      
+////test
+//      var testRange = theResultsSheet.getRange(row, totalColumn);
+//      theResultsSheet.setActiveRange(testRange).activate();
+    
+    //load data into cache and run html to create sidebar table
+    var cache = CacheService.getDocumentCache();
+    var dataTableString = JSON.stringify(dataForTotalReport); //convert to JSON to maintain format thru transfer
+    
+    cache.put('allData', dataTableString); //loads data into cache
+    
+   
+    
+    
+//    //test area for array processing
+//    var cache2 = CacheService.getDocumentCache();
+//    Logger.log('original' + dataForTotalReport + 'postJSON' + dataTableString);
+//    var dataForChart = (cache2.get('allData'));
+//    var testValue = JSON.parse(dataForChart);
+//    Logger.log('return:' + testValue);
+//    var test1 = testValue.slice(0,1);
+//    Logger.log('next step1: post slice ||| ' + test1);
+//    var test2 = test1[0].shift()
+//    Logger.log('next step2 first shift ||| ' + test2);
+//    var test3 = test1[0][0].shift();
+//    Logger.log('next step3 final titles ||| ' + test3);
+//    var test4 = test1[0][0];
+//    Logger.log('final step4 final data ||| ' + test4);
+//    //end test area
+    
+    //this section points to html page and sets the pages size
+    
+    var html = HtmlService.createHtmlOutputFromFile('tbmEverything')
+    .setWidth(660)
+    .setHeight(420);
+    SpreadsheetApp.getUi()
+    .showModalDialog(html, 'All Answers');
+      
+      } // showAllResults() function end
+      
+      
+/***************************************************************************************************************
+this function is used to pass data to tbmEverything.html via withSuccessHandler()
+************************************************************************************
+*/
+  
+  function grabTableData3() {
+    var cache2 = CacheService.getDocumentCache();
+    var dataForChart = (cache2.get('allData'));
+    
+//    //test area
+//    var testValue = JSON.parse(dataForChart);
+//    Logger.log('return:' + testValue);
+//    var test1 = testValue.slice(0,1);
+//    Logger.log('next step1: post slice ||| ' + test1);
+//    var test2 = test1[0].shift()
+//    Logger.log('next step2 first shift ||| ' + test2);
+//    var test3 = test1[0][0].shift();
+//    Logger.log('next step3 final titles ||| ' + test3);
+//    var test4 = test1;
+//    Logger.log('final step4 final data ||| ' + test4);
+    
+    return dataForChart;
+  } //grabTableData3() function end
+      
+      
+  /*********************************************************************************************
+  this function is used to clean up spreadsheet for another run
+  **********************************************************************************************
+  */
+  
+  function resetSpreadsheet() {
+    var activeSpreadsheet = SpreadsheetApp.getActive();
+    var sheetsCount = activeSpreadsheet.getNumSheets();
+    var sheets = activeSpreadsheet.getSheets();
+    var saveSheet1 = "MaturityTemplate";
+      var saveSheet2 = "Instructions";
+    
+    for (i = 0; i < sheetsCount; i++) {
+     var sheet = sheets[i];
+      var sheetName = sheet.getName();
+      Logger.log(sheetName + ' is being evaluated');
+      if (sheetName.indexOf(saveSheet1) == -1 && sheetName.indexOf(saveSheet2) == -1) {
+       activeSpreadsheet.deleteSheet(sheet);
+        Logger.log(sheetName + ' DELETED'); 
+      } else {
+       Logger.log(sheetName + ' is safe');
+      }
+       
+    }
+    
+  } //resetSpreadsheet() function end
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+
+
+        
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
 
 
 
